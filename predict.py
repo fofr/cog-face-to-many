@@ -76,7 +76,6 @@ class Predictor(BasePredictor):
 
         loader = workflow["2"]["inputs"]
         loader["cfg"] = kwargs["prompt_strength"]
-        loader["denoise"] = kwargs["denoising_strength"]
         loader["positive"] = self.style_to_prompt(style, prompt)
         loader["negative"] = self.style_to_negative_prompt(style, negative_prompt)
 
@@ -87,6 +86,7 @@ class Predictor(BasePredictor):
         instant_id["weight"] = kwargs["instant_id_strength"]
 
         sampler = workflow["4"]["inputs"]
+        sampler["denoise"] = kwargs["denoising_strength"]
         sampler["seed"] = kwargs["seed"]
 
     def style_to_prompt(self, style, prompt):
