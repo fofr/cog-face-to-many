@@ -7,8 +7,8 @@
       "lora_name": "None",
       "lora_model_strength": 1,
       "lora_clip_strength": 1,
-      "positive": "Sticker, scary zombie, cel shaded, svg, vector art, sharp",
-      "negative": "open mouth, shiny, photo, photography, soft, nsfw, nude, ugly, broken, watermark, oversaturated",
+      "positive": "3D Render Style, 3DRenderAF, person",
+      "negative": "photo, photography, nsfw, nude, ugly, broken, watermark",
       "token_normalization": "none",
       "weight_interpretation": "comfy",
       "empty_latent_width": 1024,
@@ -32,7 +32,7 @@
     "inputs": {
       "input_mode": "simple",
       "lora_count": 3,
-      "lora_name_1": "artificialguybr/StickersRedmond.safetensors",
+      "lora_name_1": "artificialguybr/3DRedmond-3DRenderStyle-3DRenderAF.safetensors",
       "lora_wt_1": 1,
       "model_str_1": 1,
       "clip_str_1": 1,
@@ -236,16 +236,16 @@
   },
   "4": {
     "inputs": {
-      "seed": 32966725480658,
+      "seed": 1051763972092850,
       "steps": 20,
       "cfg": 7,
       "sampler_name": "dpmpp_2m_sde",
       "scheduler": "karras",
-      "denoise": 1,
+      "denoise": 0.65,
       "preview_method": "none",
       "vae_decode": "true",
       "model": [
-        "43",
+        "41",
         0
       ],
       "positive": [
@@ -257,8 +257,8 @@
         2
       ],
       "latent_image": [
-        "2",
-        3
+        "51",
+        0
       ],
       "optional_vae": [
         "2",
@@ -283,182 +283,9 @@
       "title": "Save Image"
     }
   },
-  "8": {
-    "inputs": {},
-    "class_type": "BRIA_RMBG_ModelLoader_Zho",
-    "_meta": {
-      "title": "🧹BRIA_RMBG Model Loader"
-    }
-  },
-  "9": {
-    "inputs": {
-      "rmbgmodel": [
-        "8",
-        0
-      ],
-      "image": [
-        "4",
-        5
-      ]
-    },
-    "class_type": "BRIA_RMBG_Zho",
-    "_meta": {
-      "title": "🧹BRIA RMBG"
-    }
-  },
-  "10": {
-    "inputs": {
-      "filename_prefix": "ComfyUI",
-      "images": [
-        "9",
-        0
-      ]
-    },
-    "class_type": "SaveImage",
-    "_meta": {
-      "title": "Save Image"
-    }
-  },
-  "11": {
-    "inputs": {
-      "upscale_by": 2,
-      "seed": 786855515709664,
-      "steps": 10,
-      "cfg": 8,
-      "sampler_name": "euler",
-      "scheduler": "normal",
-      "denoise": 0.2,
-      "mode_type": "Linear",
-      "tile_width": 512,
-      "tile_height": 512,
-      "mask_blur": 8,
-      "tile_padding": 32,
-      "seam_fix_mode": "None",
-      "seam_fix_denoise": 1,
-      "seam_fix_width": 64,
-      "seam_fix_mask_blur": 8,
-      "seam_fix_padding": 16,
-      "force_uniform_tiles": true,
-      "tiled_decode": false,
-      "image": [
-        "4",
-        5
-      ],
-      "model": [
-        "12",
-        0
-      ],
-      "positive": [
-        "13",
-        0
-      ],
-      "negative": [
-        "14",
-        0
-      ],
-      "vae": [
-        "12",
-        2
-      ],
-      "upscale_model": [
-        "15",
-        0
-      ]
-    },
-    "class_type": "UltimateSDUpscale",
-    "_meta": {
-      "title": "Ultimate SD Upscale"
-    }
-  },
-  "12": {
-    "inputs": {
-      "ckpt_name": "dreamshaper_8.safetensors"
-    },
-    "class_type": "CheckpointLoaderSimple",
-    "_meta": {
-      "title": "Load Checkpoint"
-    }
-  },
-  "13": {
-    "inputs": {
-      "text": "svg, vector art, sharp",
-      "clip": [
-        "12",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "14": {
-    "inputs": {
-      "text": "nsfw, photo, photography, watermark",
-      "clip": [
-        "12",
-        1
-      ]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": {
-      "title": "CLIP Text Encode (Prompt)"
-    }
-  },
-  "15": {
-    "inputs": {
-      "model_name": "4x-AnimeSharp.pth"
-    },
-    "class_type": "UpscaleModelLoader",
-    "_meta": {
-      "title": "Load Upscale Model"
-    }
-  },
-  "16": {
-    "inputs": {
-      "filename_prefix": "ComfyUI",
-      "images": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "SaveImage",
-    "_meta": {
-      "title": "Save Image"
-    }
-  },
-  "17": {
-    "inputs": {
-      "rmbgmodel": [
-        "8",
-        0
-      ],
-      "image": [
-        "11",
-        0
-      ]
-    },
-    "class_type": "BRIA_RMBG_Zho",
-    "_meta": {
-      "title": "🧹BRIA RMBG"
-    }
-  },
-  "18": {
-    "inputs": {
-      "filename_prefix": "ComfyUI",
-      "images": [
-        "17",
-        0
-      ]
-    },
-    "class_type": "SaveImage",
-    "_meta": {
-      "title": "Save Image"
-    }
-  },
   "22": {
     "inputs": {
-      "image": "0_1.webp",
+      "image": "Screenshot 2024-02-26 at 16.13.24.png",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -475,31 +302,17 @@
       "title": "Load ControlNet Model"
     }
   },
-  "25": {
-    "inputs": {
-      "preprocessor": "Zoe-DepthMapPreprocessor",
-      "resolution": 1024,
-      "image": [
-        "22",
-        0
-      ]
-    },
-    "class_type": "AIO_Preprocessor",
-    "_meta": {
-      "title": "AIO Aux Preprocessor"
-    }
-  },
   "28": {
     "inputs": {
-      "strength": 0.2,
+      "strength": 0.8,
       "start_percent": 0,
-      "end_percent": 0.7000000000000001,
+      "end_percent": 1,
       "control_net": [
         "24",
         0
       ],
       "image": [
-        "25",
+        "49",
         0
       ]
     },
@@ -553,7 +366,7 @@
         0
       ],
       "image": [
-        "22",
+        "67",
         0
       ],
       "model": [
@@ -574,79 +387,51 @@
       "title": "Apply InstantID"
     }
   },
-  "42": {
+  "49": {
     "inputs": {
-      "ipadapter_file": "ip-adapter-plus-face_sdxl_vit-h.safetensors"
+      "preprocessor": "Zoe-DepthMapPreprocessor",
+      "resolution": 1024,
+      "image": [
+        "67",
+        0
+      ]
     },
-    "class_type": "IPAdapterModelLoader",
+    "class_type": "AIO_Preprocessor",
     "_meta": {
-      "title": "Load IPAdapter Model"
+      "title": "AIO Aux Preprocessor"
     }
   },
-  "43": {
+  "51": {
     "inputs": {
-      "weight": 0.2,
-      "noise": 0.5,
-      "weight_type": "original",
-      "start_at": 0,
-      "end_at": 0.2,
-      "faceid_v2": false,
-      "weight_v2": 0.4,
-      "unfold_batch": false,
-      "ipadapter": [
-        "42",
+      "pixels": [
+        "67",
         0
       ],
-      "clip_vision": [
-        "44",
-        0
-      ],
-      "insightface": [
-        "45",
-        0
-      ],
+      "vae": [
+        "2",
+        4
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "67": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "interpolation": "nearest",
+      "keep_proportion": true,
+      "condition": "always",
       "image": [
         "22",
         0
-      ],
-      "model": [
-        "41",
-        0
       ]
     },
-    "class_type": "IPAdapterApplyFaceID",
+    "class_type": "ImageResize+",
     "_meta": {
-      "title": "Apply IPAdapter FaceID"
-    }
-  },
-  "44": {
-    "inputs": {
-      "clip_name": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
-    },
-    "class_type": "CLIPVisionLoader",
-    "_meta": {
-      "title": "Load CLIP Vision"
-    }
-  },
-  "45": {
-    "inputs": {
-      "provider": "CPU"
-    },
-    "class_type": "InsightFaceLoader",
-    "_meta": {
-      "title": "Load InsightFace"
-    }
-  },
-  "47": {
-    "inputs": {
-      "images": [
-        "25",
-        0
-      ]
-    },
-    "class_type": "PreviewImage",
-    "_meta": {
-      "title": "Preview Image"
+      "title": "🔧 Image Resize"
     }
   }
 }

@@ -10,17 +10,30 @@ OUTPUT_DIR = "/tmp/outputs"
 INPUT_DIR = "/tmp/inputs"
 COMFYUI_TEMP_OUTPUT_DIR = "ComfyUI/temp"
 
-with open("face-to-sticker-api.json", "r") as file:
+with open("face-to-many-api.json", "r") as file:
     workflow_json = file.read()
 
+
+LORA_WEIGHTS_MAPPING = {
+    "3D": "artificialguybr/3DRedmond-3DRenderStyle-3DRenderAF.safetensors",
+    "Video game": "artificialguybr/PS1Redmond-PS1Game-Playstation1Graphics.safetensors",
+    "Pixels": "artificialguybr/PixelArtRedmond-Lite64.safetensors",
+    "Clay": "artificialguybr/ClayAnimationRedm.safetensors",
+    "Toy": "artificialguybr/ToyRedmond-FnkRedmAF.safetensors",
+}
+
+LORA_TYPES = list(LORA_WEIGHTS_MAPPING.keys())
 
 class Predictor(BasePredictor):
     def setup(self):
         self.comfyUI = ComfyUI("127.0.0.1:8188")
         self.comfyUI.start_server(OUTPUT_DIR, INPUT_DIR)
-        self.comfyUI.load_workflow(
-            workflow_json, check_inputs=False
-        )
+        self.comfyUI.load_workflow(workflow_json, check_inputs=False)
+        self.download_loras()
+
+    def download_loras(self):
+        for weight in LORA_WEIGHTS_MAPPING.values():
+            self.comfyUI.weights_downloader.download_weights(weight)
 
     def cleanup(self):
         self.comfyUI.clear_queue()
@@ -54,82 +67,86 @@ class Predictor(BasePredictor):
         return files
 
     def update_workflow(self, workflow, **kwargs):
-        loader = workflow["2"]["inputs"]
-        sampler = workflow["4"]["inputs"]
-        load_image = workflow["22"]["inputs"]
-        upscaler = workflow["11"]["inputs"]
-        instant_id = workflow["41"]["inputs"]
-        ip_adapter = workflow["43"]["inputs"]
+        style = kwargs["style"]
+        prompt = kwargs["prompt"]
+        negative_prompt = kwargs["negative_prompt"]
 
+        load_image = workflow["22"]["inputs"]
         load_image["image"] = kwargs["filename"]
 
+        loader = workflow["2"]["inputs"]
         loader["cfg"] = kwargs["prompt_strength"]
-        loader[
-            "positive"
-        ] = f"Sticker, {kwargs['prompt']}, cel shaded, svg, vector art, sharp"
-        loader[
-            "negative"
-        ] = f"photo, photography, nsfw, nude, ugly, broken, watermark, oversaturated, soft {kwargs['negative_prompt']}"
-        loader["empty_latent_width"] = kwargs["width"]
-        loader["empty_latent_height"] = kwargs["height"]
+        loader["positive"] = self.style_to_prompt(style, prompt)
+        loader["negative"] = self.style_to_negative_prompt(style, negative_prompt)
 
+        lora_loader = workflow["3"]["inputs"]
+        lora_loader["lora_name_1"] = LORA_WEIGHTS_MAPPING[style]
+
+        instant_id = workflow["41"]["inputs"]
         instant_id["weight"] = kwargs["instant_id_strength"]
 
-        ip_adapter["weight"] = kwargs["ip_adapter_weight"]
-        ip_adapter["noise"] = kwargs["ip_adapter_noise"]
-
-        sampler["steps"] = kwargs["steps"]
+        sampler = workflow["4"]["inputs"]
         sampler["seed"] = kwargs["seed"]
 
-        if kwargs["upscale"]:
-            del workflow["5"]
-            del workflow["9"]
-            del workflow["10"]
-            upscaler["steps"] = kwargs["upscale_steps"]
-            upscaler["seed"] = kwargs["seed"]
-        else:
-            for node_id in range(11, 19):
-                workflow.pop(str(node_id), None)
+    def style_to_prompt(self, style, prompt):
+        style_prompts = {
+            "3D": f"3D Render Style, 3DRenderAF, {prompt}",
+            "Video game": f"Playstation 1 Graphics, PS1 Game, {prompt}, Video game screenshot",
+            "Pixels": f"Pixel Art, PixArFK, {prompt}",
+            "Clay": f"Clay Animation, Clay, {prompt}",
+            "Toy": f"FnkRedmAF, {prompt}, toy, miniature",
+        }
+        return style_prompts[style]
+
+    def style_to_negative_prompt(self, style, negative_prompt=""):
+        if negative_prompt:
+            negative_prompt = f"{negative_prompt}, "
+
+        start_base_negative = "nsfw, nude, oversaturated, "
+        end_base_negative = "ugly, broken, watermark"
+        specifics = {
+            "3D": "photo, photography,",
+            "Video game": "text, photo",
+            "Pixels": "photo, photography,",
+            "Clay": "",
+            "Toy": "",
+        }
+
+        return f"{specifics[style]}{start_base_negative}{negative_prompt}{end_base_negative}"
 
     def predict(
         self,
         image: Path = Input(
-            description="An image of a person to be converted to a sticker",
+            description="An image of a person to be converted",
             default=None,
+        ),
+        style: str = Input(
+            default="3D",
+            choices=LORA_TYPES,
+            description="Style to convert to",
         ),
         prompt: str = Input(default="a person"),
         negative_prompt: str = Input(
             default="",
             description="Things you do not want in the image",
         ),
-        width: int = Input(default=1024),
-        height: int = Input(default=1024),
-        steps: int = Input(default=20),
-        seed: int = Input(
-            default=None, description="Fix the random seed for reproducibility"
+        denoising_strength: float = Input(
+            default=0.65,
+            ge=0,
+            le=1,
+            description="How much of the original image to keep. 1 is the complete destruction of the original image, 0 is the original image",
         ),
         prompt_strength: float = Input(
             default=7,
+            ge=0,
+            le=20,
             description="Strength of the prompt. This is the CFG scale, higher numbers lead to stronger prompt, lower numbers will keep more of a likeness to the original.",
         ),
         instant_id_strength: float = Input(
             default=1, description="How strong the InstantID will be.", ge=0, le=1
         ),
-        ip_adapter_weight: float = Input(
-            default=0.2,
-            description="How much the IP adapter will influence the image",
-            ge=0,
-            le=1,
-        ),
-        ip_adapter_noise: float = Input(
-            default=0.5,
-            description="How much noise is added to the IP adapter input",
-            ge=0,
-            le=1,
-        ),
-        upscale: bool = Input(default=False, description="2x upscale the sticker"),
-        upscale_steps: int = Input(
-            default=10, description="Number of steps to upscale"
+        seed: int = Input(
+            default=None, description="Fix the random seed for reproducibility"
         ),
     ) -> List[Path]:
         """Run a single prediction on the model"""
@@ -148,18 +165,13 @@ class Predictor(BasePredictor):
         self.update_workflow(
             workflow,
             filename=filename,
+            style=style,
+            denoising_strength=denoising_strength,
             seed=seed,
             prompt=prompt,
             negative_prompt=negative_prompt,
-            width=width,
-            height=height,
-            steps=steps,
-            upscale=upscale,
-            upscale_steps=upscale_steps,
             prompt_strength=prompt_strength,
             instant_id_strength=instant_id_strength,
-            ip_adapter_weight=ip_adapter_weight,
-            ip_adapter_noise=ip_adapter_noise,
         )
 
         wf = self.comfyUI.load_workflow(workflow, check_weights=False)

@@ -13,6 +13,7 @@ repos=(
   "https://github.com/ssitu/ComfyUI_UltimateSDUpscale bcefc5b"
   "https://github.com/cubiq/ComfyUI_InstantID 0fcf494"
   "https://github.com/ZHO-ZHO-ZHO/ComfyUI-BRIA_AI-RMBG 44a3f8f"
+  "https://github.com/cubiq/ComfyUI_essentials c9236fe"
 )
 
 # Destination directory
