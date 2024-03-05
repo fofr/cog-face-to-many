@@ -1,0 +1,14 @@
+__pycache__
+*.png
+*.jpg
+*.gif
+*.mp4
+*.zip
+*.ckpt
+*.safetensors
+*.pth
+*.bin
+*.torchscript
+weights.txt
+manifest.txt
+updated_weights.json

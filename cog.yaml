@@ -1,0 +1,50 @@
+build:
+  gpu: true
+  cuda: "12.1"
+  system_packages:
+    - ffmpeg
+  python_version: "3.10.6"
+  python_packages:
+    - torch
+    - torchvision
+    - torchaudio
+    - torchsde
+    - einops
+    - transformers>=4.25.1
+    - safetensors>=0.3.0
+    - aiohttp
+    - accelerate
+    - pyyaml
+    - Pillow
+    - scipy
+    - tqdm
+    - psutil
+    - websocket-client==1.6.3
+
+    # comfyui-reactor-node
+    - insightface
+    - onnx
+
+    # comfyui_controlnet_aux
+    # https://github.com/Fannovel16/comfyui_controlnet_aux/blob/main/requirements.txt
+    - importlib_metadata
+    - opencv-python-headless>=4.0.1.24
+    - filelock
+    - numpy
+    - einops
+    - pyyaml
+    - scikit-image
+    - python-dateutil
+    - mediapipe
+    - svglib
+    - fvcore
+    - yapf
+    - omegaconf
+    - ftfy
+    - addict
+    - yacs
+    - trimesh[easy]
+  run:
+    - curl -o /usr/local/bin/pget -L "https://github.com/replicate/pget/releases/download/v0.6.0/pget_linux_x86_64" && chmod +x /usr/local/bin/pget
+    - pip install onnxruntime-gpu --extra-index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/
+predict: "predict.py:Predictor"

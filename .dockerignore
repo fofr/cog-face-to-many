@@ -1,0 +1,45 @@
+**/__pycache__
+**/.git
+**/.github
+**/.ci
+
+# Outputs
+*.jpg
+*.png
+*.gif
+*.mp4
+*.zip
+*.webp
+*.webm
+
+# Models
+*.ckpt
+*.safetensors
+*.pth
+*.bin
+*.onnx
+*.torchscript
+# .pt files are used by efficiency-nodes-comfyui
+
+# Files
+scripts/*
+updated_weights.json
+
+# Extension files
+*.ipynb
+*.bat
+
+# ComfyUI
+ComfyUI/venv
+ComfyUI/temp
+ComfyUI/user
+ComfyUI/models
+ComfyUI/custom_nodes/comfyUI_controlnet_aux/ckpts
+ComfyUI/custom_nodes/efficiency-nodes-comfyui/images
+
+# ComfyUI bits we just don’t need
+ComfyUI/tests
+ComfyUI/tests-ui
+ComfyUI/notebooks
+ComfyUI/script_examples
+ComfyUI/comfyui_screenshot.png
