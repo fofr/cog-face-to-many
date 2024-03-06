@@ -16,6 +16,7 @@ with open("face-to-many-api.json", "r") as file:
 
 LORA_WEIGHTS_MAPPING = {
     "3D": "artificialguybr/3DRedmond-3DRenderStyle-3DRenderAF.safetensors",
+    "Emoji": "fofr/emoji.safetensors",
     "Video game": "artificialguybr/PS1Redmond-PS1Game-Playstation1Graphics.safetensors",
     "Pixels": "artificialguybr/PixelArtRedmond-Lite64.safetensors",
     "Clay": "artificialguybr/ClayAnimationRedm.safetensors",
@@ -92,6 +93,7 @@ class Predictor(BasePredictor):
     def style_to_prompt(self, style, prompt):
         style_prompts = {
             "3D": f"3D Render Style, 3DRenderAF, {prompt}",
+            "Emoji": f"memoji, emoji, {prompt}, 3d render, sharp",
             "Video game": f"Playstation 1 Graphics, PS1 Game, {prompt}, Video game screenshot",
             "Pixels": f"Pixel Art, PixArFK, {prompt}",
             "Clay": f"Clay Animation, Clay, {prompt}",
@@ -106,9 +108,10 @@ class Predictor(BasePredictor):
         start_base_negative = "nsfw, nude, oversaturated, "
         end_base_negative = "ugly, broken, watermark"
         specifics = {
-            "3D": "photo, photography,",
-            "Video game": "text, photo",
-            "Pixels": "photo, photography,",
+            "3D": "photo, photography, ",
+            "Emoji": "photo, photography, blurry, soft, ",
+            "Video game": "text, photo, ",
+            "Pixels": "photo, photography, ",
             "Clay": "",
             "Toy": "",
         }
