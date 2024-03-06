@@ -141,7 +141,7 @@ class Predictor(BasePredictor):
             description="How much of the original image to keep. 1 is the complete destruction of the original image, 0 is the original image",
         ),
         prompt_strength: float = Input(
-            default=7,
+            default=4.5,
             ge=0,
             le=20,
             description="Strength of the prompt. This is the CFG scale, higher numbers lead to stronger prompt, lower numbers will keep more of a likeness to the original.",
