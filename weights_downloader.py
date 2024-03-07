@@ -5,7 +5,7 @@ import os
 from weights_manifest import WeightsManifest
 
 BASE_URL = "https://weights.replicate.delivery/default/comfy-ui"
-
+BASE_PATH = "ComfyUI/models"
 
 class WeightsDownloader:
     def __init__(self):
@@ -27,6 +27,14 @@ class WeightsDownloader:
             raise ValueError(
                 f"{weight_str} unavailable. View the list of available weights: https://github.com/fofr/cog-comfyui/blob/main/supported_weights.md"
             )
+
+    def download_lora_from_replicate_url(self, uuid, url):
+        dest = f"{BASE_PATH}/loras"
+        self.download_if_not_exists(
+            uuid,
+            url,
+            dest,
+        )
 
     def download_torch_checkpoints(self):
         self.download_if_not_exists(
@@ -51,13 +59,38 @@ class WeightsDownloader:
             ["pget", "--log-level", "warn", "-xf", url, dest], close_fds=False
         )
         elapsed_time = time.time() - start
+        downloaded_file_path = os.path.join(dest, os.path.basename(weight_str))
+
+        if downloaded_file_path.endswith('.tar'):
+            downloaded_file_path = self.handle_replicate_tar(weight_str, downloaded_file_path, dest)
+
         try:
-            file_size_bytes = os.path.getsize(
-                os.path.join(dest, os.path.basename(weight_str))
-            )
+            file_size_bytes = os.path.getsize(downloaded_file_path)
             file_size_megabytes = file_size_bytes / (1024 * 1024)
             print(
-                f"⌛️ Downloaded {weight_str} in {elapsed_time:.2f}s, size: {file_size_megabytes:.2f}MB"
+                f"⌛️ Completed in {elapsed_time:.2f}s, size: {file_size_megabytes:.2f}MB"
             )
         except FileNotFoundError:
-            print(f"⌛️ Downloaded {weight_str} in {elapsed_time:.2f}s")
+            print(f"⌛️ Completed in {elapsed_time:.2f}s")
+
+    def handle_replicate_tar(self, uuid, downloaded_file_path, dest):
+        if downloaded_file_path.endswith('.tar'):
+            print(f"🔍 Extracting lora.safetensors from {downloaded_file_path}")
+            try:
+                subprocess.check_call(
+                    ["tar", "-xf", downloaded_file_path, "lora.safetensors", "-C", dest],
+                    close_fds=False
+                )
+                extracted_lora_path = os.path.join(dest, 'lora.safetensors')
+                new_file_path = os.path.join(dest, f'{uuid}.safetensors')
+                os.rename(extracted_lora_path, new_file_path)
+                print(f"✅ {uuid}.safetensors has been extracted and saved to {new_file_path}")
+
+                os.remove(downloaded_file_path)
+                print(f"🗑️ Removed {downloaded_file_path}")
+                return new_file_path
+
+            except subprocess.CalledProcessError:
+                os.remove(downloaded_file_path)
+                print(f"🗑️ Removed {downloaded_file_path}")
+                raise RuntimeError("Failed to extract lora.safetensors from the tar archive.")
