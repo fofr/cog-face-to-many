@@ -36,7 +36,7 @@ https://twitter.com/artificialguybr
 Clone this repository:
 
 ```sh
-git clone --recurse-submodules https://github.com/fofr/cog-face-to-many.git
+git clone --recurse-submodules https://github.com/pau-lozano/cog-face-to-many.git
 ```
 
 Run the [following script](https://github.com/fofr/cog-comfyui/blob/main/scripts/clone_plugins.sh) to install all the custom nodes:
