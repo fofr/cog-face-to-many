@@ -93,7 +93,8 @@ class Predictor(BasePredictor):
 
         lora_loader = workflow["3"]["inputs"]
         if (custom_style):
-            lora_loader["lora_name_1"] = f"{self.prompt_lora(custom_style)}.safetensors"
+            uuid = self.parse_custom_lora_url(custom_style)
+            lora_loader["lora_name_1"] = f"{uuid}/{uuid}.safetensors"
         else:
             lora_loader["lora_name_1"] = LORA_WEIGHTS_MAPPING[style]
 

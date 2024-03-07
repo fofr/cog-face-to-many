@@ -69,49 +69,43 @@ class WeightsDownloader:
 
     def download_custom_lora(self, uuid, url, dest):
         if not os.path.exists(f"{dest}/{uuid}"):
-            if "/" in uuid:
-                subfolder = uuid.rsplit("/", 1)[0]
-                dest = os.path.join(dest, subfolder)
-                os.makedirs(dest, exist_ok=True)
+            dest_with_uuid = os.path.join(dest, uuid)
+            os.makedirs(dest_with_uuid, exist_ok=True)
 
-            print(f"⏳ Downloading {uuid} to {dest}")
+            print(f"⏳ Downloading {uuid} to {dest_with_uuid}")
             start = time.time()
             subprocess.check_call(
-                ["pget", "--log-level", "warn", "-f", url, dest], close_fds=False
+                ["pget", "--log-level", "warn", "-xf", url, dest_with_uuid], close_fds=False
             )
             elapsed_time = time.time() - start
-            downloaded_file_path = os.path.join(dest, os.path.basename(uuid))
 
-            if downloaded_file_path.endswith('.tar'):
-                downloaded_file_path = self.handle_replicate_tar(uuid, downloaded_file_path, dest)
+            self.handle_replicate_tar(uuid, dest_with_uuid)
 
+            preserved_file_path = os.path.join(dest_with_uuid, f'{uuid}.safetensors')
             try:
-                file_size_bytes = os.path.getsize(downloaded_file_path)
+                file_size_bytes = os.path.getsize(preserved_file_path)
                 file_size_megabytes = file_size_bytes / (1024 * 1024)
-                print(
-                    f"⌛️ Completed in {elapsed_time:.2f}s, size: {file_size_megabytes:.2f}MB"
-                )
+                print(f"⌛️ Completed in {elapsed_time:.2f}s, size: {file_size_megabytes:.2f}MB")
             except FileNotFoundError:
-                print(f"⌛️ Completed in {elapsed_time:.2f}s")
+                print(f"⌛️ Completed in {elapsed_time:.2f}s but file not found.")
+        else:
+            print(f"✅ {uuid} lora folder already exists.")
 
-    def handle_replicate_tar(self, uuid, downloaded_file_path, dest):
-        if downloaded_file_path.endswith('.tar'):
-            print(f"🔍 Extracting lora.safetensors from {downloaded_file_path}")
-            try:
-                subprocess.check_call(
-                    ["tar", "-xf", downloaded_file_path, "lora.safetensors", "-C", dest],
-                    close_fds=False
-                )
-                extracted_lora_path = os.path.join(dest, 'lora.safetensors')
-                new_file_path = os.path.join(dest, f'{uuid}.safetensors')
-                os.rename(extracted_lora_path, new_file_path)
-                print(f"✅ {uuid}.safetensors has been extracted and saved to {new_file_path}")
 
-                os.remove(downloaded_file_path)
-                print(f"🗑️ Removed {downloaded_file_path}")
-                return new_file_path
+                
+    def handle_replicate_tar(self, uuid, dest_with_uuid):
+        extracted_lora_path = os.path.join(dest_with_uuid, 'lora.safetensors')
+        new_file_path = os.path.join(dest_with_uuid, f'{uuid}.safetensors')
 
-            except subprocess.CalledProcessError:
-                os.remove(downloaded_file_path)
-                print(f"🗑️ Removed {downloaded_file_path}")
-                raise RuntimeError("Failed to extract lora.safetensors from the tar archive.")
+        if os.path.exists(extracted_lora_path):
+            os.rename(extracted_lora_path, new_file_path)
+            print(f"✅ {uuid}.safetensors has been extracted and saved to {new_file_path}")
+        else:
+            raise FileNotFoundError(f"lora.safetensors not found in {dest_with_uuid}.")
+
+        # Delete other files (embeddings.pti and special_params.json) if they exist
+        for file_name in ['embeddings.pti', 'special_params.json']:
+            file_path = os.path.join(dest_with_uuid, file_name)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"🗑️ Removed {file_path}")
