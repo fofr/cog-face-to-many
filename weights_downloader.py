@@ -30,11 +30,7 @@ class WeightsDownloader:
 
     def download_lora_from_replicate_url(self, uuid, url):
         dest = f"{BASE_PATH}/loras"
-        self.download_if_not_exists(
-            uuid,
-            url,
-            dest,
-        )
+        self.download_custom_lora(uuid, url, dest)
 
     def download_torch_checkpoints(self):
         self.download_if_not_exists(
@@ -61,9 +57,6 @@ class WeightsDownloader:
         elapsed_time = time.time() - start
         downloaded_file_path = os.path.join(dest, os.path.basename(weight_str))
 
-        if downloaded_file_path.endswith('.tar'):
-            downloaded_file_path = self.handle_replicate_tar(weight_str, downloaded_file_path, dest)
-
         try:
             file_size_bytes = os.path.getsize(downloaded_file_path)
             file_size_megabytes = file_size_bytes / (1024 * 1024)
@@ -72,6 +65,34 @@ class WeightsDownloader:
             )
         except FileNotFoundError:
             print(f"⌛️ Completed in {elapsed_time:.2f}s")
+
+
+    def download_custom_lora(self, uuid, url, dest):
+        if not os.path.exists(f"{dest}/{uuid}"):
+            if "/" in uuid:
+                subfolder = uuid.rsplit("/", 1)[0]
+                dest = os.path.join(dest, subfolder)
+                os.makedirs(dest, exist_ok=True)
+
+            print(f"⏳ Downloading {uuid} to {dest}")
+            start = time.time()
+            subprocess.check_call(
+                ["pget", "--log-level", "warn", "-f", url, dest], close_fds=False
+            )
+            elapsed_time = time.time() - start
+            downloaded_file_path = os.path.join(dest, os.path.basename(uuid))
+
+            if downloaded_file_path.endswith('.tar'):
+                downloaded_file_path = self.handle_replicate_tar(uuid, downloaded_file_path, dest)
+
+            try:
+                file_size_bytes = os.path.getsize(downloaded_file_path)
+                file_size_megabytes = file_size_bytes / (1024 * 1024)
+                print(
+                    f"⌛️ Completed in {elapsed_time:.2f}s, size: {file_size_megabytes:.2f}MB"
+                )
+            except FileNotFoundError:
+                print(f"⌛️ Completed in {elapsed_time:.2f}s")
 
     def handle_replicate_tar(self, uuid, downloaded_file_path, dest):
         if downloaded_file_path.endswith('.tar'):
