@@ -82,21 +82,29 @@ class Predictor(BasePredictor):
         prompt = kwargs["prompt"]
         negative_prompt = kwargs["negative_prompt"]
         custom_style = kwargs["lora_url"]
+        
+        if custom_style:
+            uuid = self.parse_custom_lora_url(custom_style)
+            lora_name = f"{uuid}/{uuid}.safetensors"
+        else:
+            lora_name = LORA_WEIGHTS_MAPPING[style]
+            prompt = self.style_to_prompt(style, prompt)
+            negative_prompt = self.style_to_negative_prompt(style, negative_prompt)
+        
 
         load_image = workflow["22"]["inputs"]
         load_image["image"] = kwargs["filename"]
 
         loader = workflow["2"]["inputs"]
-        loader["cfg"] = kwargs["prompt_strength"]
-        loader["positive"] = self.style_to_prompt(style, prompt)
-        loader["negative"] = self.style_to_negative_prompt(style, negative_prompt)
+        loader["positive"] = prompt
+        loader["negative"] = negative_prompt
+        
+        controlnet = workflow["28"]["inputs"]
+        controlnet["strength"] = kwargs["control_depth_strength"]
 
         lora_loader = workflow["3"]["inputs"]
-        if (custom_style):
-            uuid = self.parse_custom_lora_url(custom_style)
-            lora_loader["lora_name_1"] = f"{uuid}/{uuid}.safetensors"
-        else:
-            lora_loader["lora_name_1"] = LORA_WEIGHTS_MAPPING[style]
+        lora_loader["lora_name_1"] = lora_name
+        lora_loader["lora_wt_1"] = kwargs["lora_scale"]
 
         instant_id = workflow["41"]["inputs"]
         instant_id["weight"] = kwargs["instant_id_strength"]
@@ -104,6 +112,7 @@ class Predictor(BasePredictor):
         sampler = workflow["4"]["inputs"]
         sampler["denoise"] = kwargs["denoising_strength"]
         sampler["seed"] = kwargs["seed"]
+        sampler["cfg"] = kwargs["prompt_strength"]
 
     def style_to_prompt(self, style, prompt):
         style_prompts = {
@@ -161,6 +170,12 @@ class Predictor(BasePredictor):
             le=20,
             description="Strength of the prompt. This is the CFG scale, higher numbers lead to stronger prompt, lower numbers will keep more of a likeness to the original.",
         ),
+        control_depth_strength: float = Input(
+            default=0.8,
+            ge=0,
+            le=1,
+            description="Strength of depth controlnet. The bigger this is, the more controlnet affects the output.",
+        ),
         instant_id_strength: float = Input(
             default=1, description="How strong the InstantID will be.", ge=0, le=1
         ),
@@ -169,6 +184,9 @@ class Predictor(BasePredictor):
         ),
         custom_lora_url: str = Input(
             default=None, description="Custom Lora URL"
+        ),
+        lora_scale: float = Input(
+            default=1, description="How strong the LoRA will be.", ge=0, le=1
         )
     ) -> List[Path]:
         """Run a single prediction on the model"""
@@ -196,7 +214,9 @@ class Predictor(BasePredictor):
             negative_prompt=negative_prompt,
             prompt_strength=prompt_strength,
             instant_id_strength=instant_id_strength,
-            lora_url=custom_lora_url
+            lora_url=custom_lora_url,
+            lora_scale=lora_scale,
+            control_depth_strength=control_depth_strength
         )
 
         wf = self.comfyUI.load_workflow(workflow, check_weights=False)
