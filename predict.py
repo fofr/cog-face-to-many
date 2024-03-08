@@ -25,6 +25,7 @@ LORA_WEIGHTS_MAPPING = {
 
 LORA_TYPES = list(LORA_WEIGHTS_MAPPING.keys())
 
+
 class Predictor(BasePredictor):
     def setup(self):
         self.comfyUI = ComfyUI("127.0.0.1:8188")
@@ -39,8 +40,10 @@ class Predictor(BasePredictor):
     def add_to_lora_map(self, lora_url: str):
         uuid = self.parse_custom_lora_url(lora_url)
 
-        if (uuid not in LORA_TYPES):
-            self.comfyUI.weights_downloader.download_lora_from_replicate_url(uuid, lora_url)
+        if uuid not in LORA_TYPES:
+            self.comfyUI.weights_downloader.download_lora_from_replicate_url(
+                uuid, lora_url
+            )
 
     def download_loras(self):
         for weight in LORA_WEIGHTS_MAPPING.values():
@@ -82,7 +85,7 @@ class Predictor(BasePredictor):
         prompt = kwargs["prompt"]
         negative_prompt = kwargs["negative_prompt"]
         custom_style = kwargs["lora_url"]
-        
+
         if custom_style:
             uuid = self.parse_custom_lora_url(custom_style)
             lora_name = f"{uuid}/{uuid}.safetensors"
@@ -90,7 +93,6 @@ class Predictor(BasePredictor):
             lora_name = LORA_WEIGHTS_MAPPING[style]
             prompt = self.style_to_prompt(style, prompt)
             negative_prompt = self.style_to_negative_prompt(style, negative_prompt)
-        
 
         load_image = workflow["22"]["inputs"]
         load_image["image"] = kwargs["filename"]
@@ -98,7 +100,7 @@ class Predictor(BasePredictor):
         loader = workflow["2"]["inputs"]
         loader["positive"] = prompt
         loader["negative"] = negative_prompt
-        
+
         controlnet = workflow["28"]["inputs"]
         controlnet["strength"] = kwargs["control_depth_strength"]
 
@@ -183,11 +185,12 @@ class Predictor(BasePredictor):
             default=None, description="Fix the random seed for reproducibility"
         ),
         custom_lora_url: str = Input(
-            default=None, description="Custom Lora URL"
+            default=None,
+            description="URL to a Replicate custom LoRA. Must be in the format https://replicate.delivery/pbxt/[id]/trained_model.tar",
         ),
         lora_scale: float = Input(
-            default=1, description="How strong the LoRA will be.", ge=0, le=1
-        )
+            default=1, description="How strong the LoRA will be", ge=0, le=1
+        ),
     ) -> List[Path]:
         """Run a single prediction on the model"""
         self.cleanup()
@@ -196,7 +199,9 @@ class Predictor(BasePredictor):
             raise ValueError("No image provided")
 
         filename = self.handle_input_file(image)
-        if (custom_lora_url is not None) :
+        if custom_lora_url is not None:
+            if not custom_lora_url.startswith("https://replicate.delivery/pbxt/") or not custom_lora_url.endswith("/trained_model.tar"):
+                raise ValueError("Custom LoRA URL format is not supported. Must be in the format https://replicate.delivery/pbxt/[id]/trained_model.tar")
             self.add_to_lora_map(custom_lora_url)
 
         if seed is None:
@@ -216,7 +221,7 @@ class Predictor(BasePredictor):
             instant_id_strength=instant_id_strength,
             lora_url=custom_lora_url,
             lora_scale=lora_scale,
-            control_depth_strength=control_depth_strength
+            control_depth_strength=control_depth_strength,
         )
 
         wf = self.comfyUI.load_workflow(workflow, check_weights=False)
