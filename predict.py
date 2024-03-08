@@ -34,7 +34,10 @@ class Predictor(BasePredictor):
         self.download_loras()
 
     def parse_custom_lora_url(self, url: str):
-        parts_after_pbxt = url.split("/pbxt/")[1]
+        if "pbxt.replicate" in url:
+            parts_after_pbxt = url.split("/pbxt.replicate.delivery/")[1]
+        else:
+            parts_after_pbxt = url.split("/pbxt/")[1]
         return parts_after_pbxt.split("/trained_model.tar")[0]
 
     def add_to_lora_map(self, lora_url: str):
@@ -186,7 +189,7 @@ class Predictor(BasePredictor):
         ),
         custom_lora_url: str = Input(
             default=None,
-            description="URL to a Replicate custom LoRA. Must be in the format https://replicate.delivery/pbxt/[id]/trained_model.tar",
+            description="URL to a Replicate custom LoRA. Must be in the format https://replicate.delivery/pbxt/[id]/trained_model.tar or https://pbxt.replicate.delivery/[id]/trained_model.tar",
         ),
         lora_scale: float = Input(
             default=1, description="How strong the LoRA will be", ge=0, le=1
@@ -200,8 +203,13 @@ class Predictor(BasePredictor):
 
         filename = self.handle_input_file(image)
         if custom_lora_url is not None:
-            if not custom_lora_url.startswith("https://replicate.delivery/pbxt/") or not custom_lora_url.endswith("/trained_model.tar"):
-                raise ValueError("Custom LoRA URL format is not supported. Must be in the format https://replicate.delivery/pbxt/[id]/trained_model.tar")
+            if not (
+                "https://replicate.delivery/pbxt/" in custom_lora_url
+                or "https://pbxt.replicate.delivery/" in custom_lora_url
+            ) or not custom_lora_url.endswith("/trained_model.tar"):
+                raise ValueError(
+                    "Custom LoRA URL format is not supported. Must be in the format https://replicate.delivery/pbxt/[id]/trained_model.tar or https://pbxt.replicate.delivery/[id]/trained_model.tar"
+                )
             self.add_to_lora_map(custom_lora_url)
 
         if seed is None:
