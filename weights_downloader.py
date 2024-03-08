@@ -64,7 +64,7 @@ class WeightsDownloader:
                 f"⌛️ Completed in {elapsed_time:.2f}s, size: {file_size_megabytes:.2f}MB"
             )
         except FileNotFoundError:
-            print(f"⌛️ Completed in {elapsed_time:.2f}s")
+            print(f"⌛️ Completed in {elapsed_time:.2f}s but file not found.")
 
 
     def download_custom_lora(self, uuid, url, dest):
