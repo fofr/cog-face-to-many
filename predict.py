@@ -42,11 +42,7 @@ class Predictor(BasePredictor):
 
     def add_to_lora_map(self, lora_url: str):
         uuid = self.parse_custom_lora_url(lora_url)
-
-        if uuid not in LORA_TYPES:
-            self.comfyUI.weights_downloader.download_lora_from_replicate_url(
-                uuid, lora_url
-            )
+        self.comfyUI.weights_downloader.download_lora_from_replicate_url(uuid, lora_url)
 
     def download_loras(self):
         for weight in LORA_WEIGHTS_MAPPING.values():
