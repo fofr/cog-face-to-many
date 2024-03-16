@@ -5,7 +5,7 @@ Some weights used in this model cannot be used commercially. See details below.
 ## Non-commercial weights
 
 ### BRIA AI RMBG 1.4
-
+[CHANGELOG.md](https://github.com/fofr/cog-face-to-many/files/14625562/CHANGELOG.md)
 BRIA AI’s remove background tool cannot be used commercially without prior agreement. [See full licence details](https://bria.ai/bria-huggingface-model-license-agreement/)
 
 - RMBG-1.4/model.pth
