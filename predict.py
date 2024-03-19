@@ -2,6 +2,7 @@ import os
 import shutil
 import random
 import json
+from PIL import Image, ExifTags
 from typing import List
 from cog import BasePredictor, Input, Path
 from helpers.comfyui import ComfyUI
@@ -57,7 +58,29 @@ class Predictor(BasePredictor):
 
     def handle_input_file(self, input_file: Path):
         file_extension = os.path.splitext(input_file)[1].lower()
-        if file_extension in [".jpg", ".jpeg", ".png", ".webp"]:
+        if file_extension in [".jpg", ".jpeg"]:
+            filename = "input.png"
+            image = Image.open(input_file)
+
+            try:
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation] == 'Orientation':
+                        break
+                exif = dict(image._getexif().items())
+
+                if exif[orientation] == 3:
+                    image = image.rotate(180, expand=True)
+                elif exif[orientation] == 6:
+                    image = image.rotate(270, expand=True)
+                elif exif[orientation] == 8:
+                    image = image.rotate(90, expand=True)
+            except (KeyError, AttributeError):
+                # EXIF data does not have orientation
+                # Do not rotate
+                pass
+
+            image.save(os.path.join(INPUT_DIR, filename))
+        elif file_extension in [".png", ".webp"]:
             filename = f"input{file_extension}"
             shutil.copy(input_file, os.path.join(INPUT_DIR, filename))
         else:
