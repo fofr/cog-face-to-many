@@ -36,13 +36,57 @@ https://twitter.com/artificialguybr
 Clone this repository:
 
 ```sh
-git clone --recurse-submodules https://github.com/fofr/cog-face-to-many.git
+git clone --recurse-submodules https://github.com/0chencc/cog-face-to-many.git && cd cog-face-to-many/ComfyUI
 ```
 
-Run the [following script](https://github.com/fofr/cog-comfyui/blob/main/scripts/clone_plugins.sh) to install all the custom nodes:
+Create python venv and activate
+
+```sh
+python3 -m venv . && source bin/activate
+```
+
+Install the required dependencies
+
+```sh
+pip install -r requirements.txt
+```
+
+Download albedobaseXL_v13.safetensors to models/checkpoints
+
+
+```sh
+wget https://huggingface.co/frankjoshua/albedobaseXL_v13/resolve/main/albedobaseXL_v13.safetensors?download=true -O models/checkpoints/albedobaseXL_v13.safetensors
+```
+
+Download antelopev2
+
+
+```sh
+git clone https://huggingface.co/DIAMONIK7777/antelopev2 models/insightface/models/antelopev2
+```
+
+Download instantid-ip-adapter.bin
+
+```sh
+wget https://huggingface.co/Aitrepreneur/InstantID-Controlnet/resolve/main/checkpoints/ip-adapter.bin?download=true -O models/instantid/instantid-ip-adapter.bin
+```
+
+Download instantid-controlnet.safetensors
+
+```sh
+wget https://huggingface.co/Aitrepreneur/InstantID-Controlnet/resolve/main/checkpoints/ControlNetModel/diffusion_pytorch_model.safetensors?download=true -O models/controlnet/instantid-controlnet.safetensors
+```
+
+Run the [following script](https://github.com/0Chencc/cog-face-to-many/blob/main/scripts/clone_plugins.sh) to install all the custom nodes:
 
 ```sh
 ./scripts/clone_plugins.sh
+```
+
+Finally, install it, run it and enjoy it!
+
+```sh
+python3 main.py
 ```
 
 ### Running the Web UI from your Cog container
