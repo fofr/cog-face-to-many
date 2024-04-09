@@ -36,7 +36,7 @@ https://twitter.com/artificialguybr
 Clone this repository:
 
 ```sh
-git clone --recurse-submodules https://github.com/0chencc/cog-face-to-many.git && cd cog-face-to-many/ComfyUI
+git clone --recurse-submodules https://github.com/fofr/cog-face-to-many.git && cd cog-face-to-many/ComfyUI
 ```
 
 Create python venv and activate
@@ -77,7 +77,7 @@ Download instantid-controlnet.safetensors
 wget https://huggingface.co/Aitrepreneur/InstantID-Controlnet/resolve/main/checkpoints/ControlNetModel/diffusion_pytorch_model.safetensors?download=true -O models/controlnet/instantid-controlnet.safetensors
 ```
 
-Run the [following script](https://github.com/0Chencc/cog-face-to-many/blob/main/scripts/clone_plugins.sh) to install all the custom nodes:
+Run the [following script](https://github.com/fofr/cog-face-to-many/blob/main/scripts/clone_plugins.sh) to install all the custom nodes:
 
 ```sh
 ./scripts/clone_plugins.sh
