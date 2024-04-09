@@ -58,7 +58,15 @@ class Predictor(BasePredictor):
 
     def handle_input_file(self, input_file: Path):
         file_extension = os.path.splitext(input_file)[1].lower()
-        if file_extension in [".jpg", ".jpeg"]:
+
+        if file_extension in [".png", ".webp", ".gif"]:
+            filename = f"input{file_extension}"
+            shutil.copy(input_file, os.path.join(INPUT_DIR, filename))
+        else:
+            # If the file is jpg, jpeg or unknown, convert to png
+            # We convert jpgs so that we remove any EXIF data related to HDR images – ComfyUI cannot load HDR images at the moment: https://github.com/fofr/cog-face-to-many/issues/1
+            # Alternatively, if there is no file extension, like a base64 image
+            # we'll try saving it as a PNG
             filename = "input.png"
             image = Image.open(input_file)
 
@@ -80,11 +88,6 @@ class Predictor(BasePredictor):
                 pass
 
             image.save(os.path.join(INPUT_DIR, filename))
-        elif file_extension in [".png", ".webp"]:
-            filename = f"input{file_extension}"
-            shutil.copy(input_file, os.path.join(INPUT_DIR, filename))
-        else:
-            raise ValueError(f"Unsupported file type: {file_extension}")
 
         return filename
 
