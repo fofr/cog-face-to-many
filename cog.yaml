@@ -20,6 +20,7 @@ build:
     - tqdm
     - psutil
     - websocket-client==1.6.3
+    - kornia>=0.7.1
 
     # comfyui-reactor-node
     - insightface
